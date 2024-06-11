@@ -36,10 +36,10 @@ pipeline {
         stage('Download and Run Snyk CLI') {
             steps {
                 sh '''
-                    latest_version=$(curl -Is "https://github.com/snyk/snyk/releases/latest" | grep "^location" | sed s#.*tag/##g | tr -d "\r")
-                    echo "Downloading Snyk CLI Version: ${latest_version}"
+                    version=v1.1291.1
+                    echo "Downloading Snyk CLI Version: ${version}"
 
-                    curl -Lo ./snyk https://github.com/snyk/snyk/releases/download/${latest_version}/snyk-linux
+                    curl -Lo ./snyk https://github.com/snyk/snyk/releases/download/${version}/snyk-linux
                     chmod +x snyk
 
                     ./snyk test
