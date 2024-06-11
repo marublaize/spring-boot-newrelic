@@ -1,7 +1,7 @@
 pipeline {
     agent {
         kubernetes {
-            label "jenkins-agent-${JOB_NAME}"
+            label "jenkins-agent-${JOB_BASE_NAME}"
             defaultContainer 'gradle'
             yaml """
                 apiVersion: v1
@@ -40,9 +40,9 @@ pipeline {
                     echo "Downloading Snyk CLI Version: ${version}"
 
                     architecture=$(uname -m)
-                    if [ "$architecture" == "x86_64" ]; then
+                    if [ "$architecture" = "x86_64" ]; then
                         snyk_cli_dl="https://github.com/snyk/snyk/releases/download/${version}/snyk-linux"
-                    elif [ "$architecture" == "aarch64" ] || [ "$architecture" == "arm64" ]; then
+                    elif [ "$architecture" = "aarch64" ] || [ "$architecture" = "arm64" ]; then
                         snyk_cli_dl="https://github.com/snyk/snyk/releases/download/${version}/snyk-linux-arm64"
                     else
                         echo "Unsupported architecture: $architecture"
