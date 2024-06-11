@@ -32,6 +32,10 @@ pipeline {
         }
     }
 
+environment {
+    SNYK_TOKEN = credentials('snyk-api-token')
+}
+
     stages {
         stage('Download and Run Snyk CLI') {
             steps {
@@ -54,7 +58,7 @@ pipeline {
                     curl -Lo ./snyk "${snyk_cli_dl}"
                     chmod +x snyk
 
-                    ./snyk -v
+                    ./snyk auth ${SNYK_TOKEN}
                     ./snyk test
                 '''
             }
