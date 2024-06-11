@@ -34,24 +34,26 @@ pipeline {
 
     stages {
         stage('Download and Run Snyk CLI') {
+            steps {
                 sh '''
                     latest_version=$(curl -Is "https://github.com/snyk/snyk/releases/latest" | grep "^location" | sed s#.*tag/##g | tr -d "\r")
-                    echo "Latest Snyk CLI Version: ${latest_version}"
+                    echo "Downloading Snyk CLI Version: ${latest_version}"
 
                     curl -Lo ./snyk https://github.com/snyk/snyk/releases/download/${latest_version}/snyk-linux
                     chmod +x snyk
-                    ls -la
-                    ./snyk -v
+
                     ./snyk test
                 '''
+            }
         }
 
         stage('Build and Test') {
-            sh '''
-                ./gradlew build
-                ./gradlew test
-            '''
-            
+            steps {
+                sh '''
+                    ./gradlew build
+                    ./gradlew test
+                '''
+            }
             post {
                 success {
                     archiveArtifacts 'build/libs/*.jar'
