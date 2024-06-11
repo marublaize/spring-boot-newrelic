@@ -7,35 +7,23 @@ pipeline {
         KUBECONFIG = credentials('kubeconfig')
     }
 
-    stages {
-        stage('Checkout') {
-            steps {
-                git 'https://github.com/marublaize/spring-boot-newrelic.git'
-            }
-        }
-
-        stage('Snyk Security Scan') {
-            steps {
-                script {
-                    sh 'snyk auth $SNYK_TOKEN'
-                    sh 'snyk test'
-                }
-            }
-        }
-
-        stage('Build') {
+    stage('Build') {
             steps {
                 sh './gradlew clean build'
             }
         }
 
-        stage('Test') {
-            steps {
-                sh './gradlew test'
-            }
-        }
+    stage('Test') {
+      steps {
+        echo 'Testing...'
+        snykSecurity(
+          snykInstallation: 'Snyk',
+          snykTokenId: '${SNYK_TOKEN}'
+        )
+      }
+    }
 
-        stage('Deploy to Kubernetes') {
+    stage('Deploy') {
             steps {
                 withCredentials([file(credentialsId: 'kubeconfig', variable: 'KUBECONFIG')]) {
                     sh 'kubectl --kubeconfig=$KUBECONFIG apply -f kubernetes/deployment.yaml'
@@ -47,7 +35,7 @@ stage('Get New Relic Application ID') {
     steps {
         script {
             def newRelicApiKey = credentials('newrelic-api-key')
-            def applicationName = 'Your Application Name' // Replace with your application name
+            def applicationName = 'spring-boot-newrelic'
             def apiUrl = "https://api.newrelic.com/v2/applications.json?filter[name]=${applicationName}"
 
             def response = sh (
