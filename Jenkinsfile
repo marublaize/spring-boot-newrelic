@@ -1,7 +1,7 @@
 pipeline {
     agent {
         kubernetes {
-            label 'my-pod-label'
+            label "jenkins-agent-${JOB_NAME}"
             defaultContainer 'gradle'
             yaml """
                 apiVersion: v1
@@ -39,9 +39,22 @@ pipeline {
                     version=v1.1291.1
                     echo "Downloading Snyk CLI Version: ${version}"
 
-                    curl -Lo ./snyk https://github.com/snyk/snyk/releases/download/${version}/snyk-linux
+                    architecture=$(uname -m)
+                    if [ "$architecture" == "x86_64" ]; then
+                        snyk_cli_dl="https://github.com/snyk/snyk/releases/download/${version}/snyk-linux"
+                    elif [ "$architecture" == "aarch64" ] || [ "$architecture" == "arm64" ]; then
+                        snyk_cli_dl="https://github.com/snyk/snyk/releases/download/${version}/snyk-linux-arm64"
+                    else
+                        echo "Unsupported architecture: $architecture"
+                        exit 1
+                    fi
+
+                    echo "Download URL: ${snyk_cli_dl}"
+
+                    curl -Lo ./snyk "${snyk_cli_dl}"
                     chmod +x snyk
 
+                    ./snyk -v
                     ./snyk test
                 '''
             }
@@ -62,15 +75,6 @@ pipeline {
                     junit 'build/test-results/**/*.xml'
                 }
             }
-        }
-    }
-
-    post {
-        success {
-            echo 'Pipeline succeeded!'
-        }
-        failure {
-            echo 'Pipeline failed!'
         }
     }
 }
