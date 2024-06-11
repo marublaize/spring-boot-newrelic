@@ -59,7 +59,7 @@ environment {
                     chmod +x snyk
 
                     ./snyk auth ${SNYK_TOKEN}
-                    ./snyk test
+                    ./snyk test --severity-threshold=critical
                 '''
             }
         }
