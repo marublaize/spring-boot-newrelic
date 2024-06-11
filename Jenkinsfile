@@ -1,6 +1,13 @@
 pipeline {
     agent any
 
+    podTemplate(label: label, containers: [
+        containerTemplate(name: 'gradle', image: 'gradle:jdk17', command: 'cat', ttyEnabled: true),
+        containerTemplate(name: 'docker', image: 'docker', command: 'cat', ttyEnabled: true),
+        containerTemplate(name: 'kubectl', image: 'lachlanevenson/k8s-kubectl:v1.8.8', command: 'cat', ttyEnabled: true),
+        containerTemplate(name: 'helm', image: 'lachlanevenson/k8s-helm:latest', command: 'cat', ttyEnabled: true)
+    ]
+
     // Pull your Snyk token from a Jenkins encrypted credential
     // (type "Secret text"... see https://jenkins.io/doc/book/using/using-credentials/#adding-new-global-credentials)
     // and put it in temporary environment variable for the Snyk CLI to consume.
@@ -9,7 +16,7 @@ pipeline {
     }
 
         stage('Download Snyk CLI') {
-            steps {
+            containers(named('gradle')) {
                 sh '''
                     latest_version=$(curl -Is "https://github.com/snyk/snyk/releases/latest" | grep "^location" | sed s#.*tag/##g | tr -d "\r")
                     echo "Latest Snyk CLI Version: ${latest_version}"
