@@ -96,14 +96,14 @@ environment {
                     curl -s -X POST "https://api.newrelic.com/v2/applications/${NEW_RELIC_APP_ID}/deployments.json" \
                         -H "X-Api-Key:${NEW_RELIC_API_KEY}" \
                         -H "Content-Type: application/json" \
-                        -d "{
-                            \"deployment\": {
-                                \"revision\": \"${COMMIT_HASH}\",
-                                \"changelog\": \"See GitHub for details\",
-                                \"description\": \"Deployment triggered by Jenkins\",
-                                \"user\": \"Jenkins\"
+                        -d '{
+                            "deployment": {
+                                "revision": "'"${COMMIT_HASH}"'",
+                                "changelog": "See GitHub for details",
+                                "description": "Deployment triggered by Jenkins",
+                                "user": "Jenkins"
                             }
-                        }"
+                        }'
                 '''
             }
         }
