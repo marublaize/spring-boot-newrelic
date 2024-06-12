@@ -35,7 +35,7 @@ pipeline {
 environment {
     SNYK_TOKEN = credentials('snyk-api-token')
     NEW_RELIC_API_KEY = credentials('newrelic')
-    NEW_RELIC_APP_ID=574050257
+    APP_NAME='spring-boot-newrelic'
 }
 
     stages {
@@ -95,6 +95,10 @@ environment {
         stage('Notify New Relic') {
             steps {
                 sh '''
+                    NEW_RELIC_APP_ID=$(curl -s -X GET "https://api.newrelic.com/v2/applications.json" \                            v1.8.5
+                        -H "X-Api-Key:${NEW_RELIC_API_KEY}" \
+                        -d "filter[name]=${APP_NAME}" | jq -r '.applications[0].id')
+
                     curl -X POST "https://api.newrelic.com/v2/applications/${NEW_RELIC_APP_ID}/deployments.json" \
                         -H "X-Api-Key:${NEW_RELIC_API_KEY}" \
                         -H "Content-Type: application/json" \
