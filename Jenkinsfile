@@ -13,7 +13,7 @@ pipeline {
                     command:
                     - 'sh'
                     - '-c'
-                    - 'git config --global --add safe.directory $(pwd) && exec cat'
+                    - 'git config --global --add safe.directory \$PWD && exec cat'
                     tty: true
                   - name: docker
                     image: docker
