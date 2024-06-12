@@ -1,7 +1,7 @@
 pipeline {
     agent {
         kubernetes {
-            label "jenkins-agent-${GIT_COMMIT}"
+            label "jenkins-agent"
             defaultContainer 'gradle'
             yaml """
                 apiVersion: v1
@@ -87,12 +87,14 @@ environment {
                 script {
                     sh '''
                         NEW_RELIC_APP_ID=574050257
+                        COMMIT_HASH=(git rev-parse --short HEAD)
+
                         curl -X POST "https://api.newrelic.com/v2/applications/${NEW_RELIC_APP_ID}/deployments.json" \
                         -H "X-Api-Key:${NEW_RELIC_API_KEY}" \
                         -H "Content-Type: application/json" \
                         -d '{
                             "deployment": {
-                                "revision": "${GIT_COMMIT}",
+                                "revision": "${COMMIT_HASH}",
                                 "changelog": "See GitHub for details",
                                 "description": "Deployment triggered by Jenkins",
                                 "user": "Jenkins"
