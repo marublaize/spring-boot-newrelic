@@ -57,7 +57,7 @@ environment {
 
                     echo "Download URL: ${snyk_cli_dl}"
 
-                    curl -Lo ./snyk "${snyk_cli_dl}"
+                    curl -s -Lo ./snyk "${snyk_cli_dl}"
                     chmod +x snyk
 
                     ./snyk auth ${SNYK_TOKEN}
@@ -86,14 +86,14 @@ environment {
         stage('Notify New Relic') {
             steps {
                 sh '''
-                    apt update && apt install -y jq
+                    apt update -qq && apt install -y -qq jq
                     NEW_RELIC_APP_ID=$(curl -s -X GET "https://api.newrelic.com/v2/applications.json" \
                         -H "X-Api-Key:${NEW_RELIC_API_KEY}" \
                         -d "filter[name]=${APP_NAME}" | jq -r '.applications[0].id')
 
                     git config --global --add safe.directory ${PWD}
-                    COMMIT_HASH=$(git rev-parse HEAD)
-                    curl -X POST "https://api.newrelic.com/v2/applications/${NEW_RELIC_APP_ID}/deployments.json" \
+                    COMMIT_HASH=$(git rev-parse --short HEAD)
+                    curl -s -X POST "https://api.newrelic.com/v2/applications/${NEW_RELIC_APP_ID}/deployments.json" \
                         -H "X-Api-Key:${NEW_RELIC_API_KEY}" \
                         -H "Content-Type: application/json" \
                         -d "{
