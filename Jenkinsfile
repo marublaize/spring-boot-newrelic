@@ -11,9 +11,7 @@ pipeline {
                   - name: gradle
                     image: gradle:jdk17
                     command:
-                    - 'sh'
-                    - '-c'
-                    - 'git config --global --add safe.directory \$PWD && exec cat'
+                    - 'cat'
                     tty: true
                   - name: docker
                     image: docker
