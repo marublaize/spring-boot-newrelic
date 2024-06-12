@@ -11,6 +11,7 @@ pipeline {
                   - name: gradle
                     image: gradle:jdk17
                     command:
+                    - 'find /home/jenkins/agent/workspace -type d | xargs -I {} git config --global --add safe.directory {}'
                     - 'cat'
                     tty: true
                   - name: docker
