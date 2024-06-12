@@ -95,7 +95,7 @@ environment {
         stage('Notify New Relic') {
             steps {
                 sh '''
-                    NEW_RELIC_APP_ID=$(curl -s -X GET "https://api.newrelic.com/v2/applications.json" \                            v1.8.5
+                    NEW_RELIC_APP_ID=$(curl -s -X GET "https://api.newrelic.com/v2/applications.json" \
                         -H "X-Api-Key:${NEW_RELIC_API_KEY}" \
                         -d "filter[name]=${APP_NAME}" | jq -r '.applications[0].id')
 
