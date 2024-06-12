@@ -44,14 +44,14 @@ environment {
         stage('Download and Run Snyk CLI') {
             steps {
                 sh '''
-                    version=v1.1291.1
-                    echo "Downloading Snyk CLI Version: ${version}"
+                    snyk_version=v1.1291.1
+                    echo "Downloading Snyk CLI Version: ${snyk_version}"
 
                     architecture=$(uname -m)
                     if [ "$architecture" = "x86_64" ]; then
-                        snyk_cli_dl="https://github.com/snyk/snyk/releases/download/${version}/snyk-linux"
+                        snyk_cli_dl="https://github.com/snyk/snyk/releases/download/${snyk_version}/snyk-linux"
                     elif [ "$architecture" = "aarch64" ] || [ "$architecture" = "arm64" ]; then
-                        snyk_cli_dl="https://github.com/snyk/snyk/releases/download/${version}/snyk-linux-arm64"
+                        snyk_cli_dl="https://github.com/snyk/snyk/releases/download/${snyk_version}/snyk-linux-arm64"
                     else
                         echo "Unsupported architecture: $architecture"
                         exit 1
@@ -88,6 +88,7 @@ environment {
         stage('Notify New Relic') {
             steps {
                 sh '''
+                    apk update && apk add jq
                     NEW_RELIC_APP_ID=$(curl -s -X GET "https://api.newrelic.com/v2/applications.json" \
                         -H "X-Api-Key:${NEW_RELIC_API_KEY}" \
                         -d "filter[name]=${APP_NAME}" | jq -r '.applications[0].id')
