@@ -91,6 +91,7 @@ environment {
                         -H "X-Api-Key:${NEW_RELIC_API_KEY}" \
                         -d "filter[name]=${APP_NAME}" | jq -r '.applications[0].id')
 
+                    git config --global --add safe.directory ${PWD}
                     COMMIT_HASH=$(git rev-parse HEAD)
                     curl -X POST "https://api.newrelic.com/v2/applications/${NEW_RELIC_APP_ID}/deployments.json" \
                         -H "X-Api-Key:${NEW_RELIC_API_KEY}" \
