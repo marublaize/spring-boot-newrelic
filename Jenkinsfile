@@ -41,15 +41,6 @@ environment {
 }
 
     stages {
-        stage('Get Commit Hash') {
-            steps {
-                script {
-                    def commitHash = sh(script: 'git rev-parse --short HEAD', returnStdout: true).trim()
-                    env.COMMIT_HASH = commitHash
-                }
-            }
-        }
-
         stage('Download and Run Snyk CLI') {
             steps {
                 sh '''
@@ -101,6 +92,7 @@ environment {
                         -H "X-Api-Key:${NEW_RELIC_API_KEY}" \
                         -d "filter[name]=${APP_NAME}" | jq -r '.applications[0].id')
 
+                    COMMIT_HASH=$(git rev-parse HEAD)
                     curl -X POST "https://api.newrelic.com/v2/applications/${NEW_RELIC_APP_ID}/deployments.json" \
                         -H "X-Api-Key:${NEW_RELIC_API_KEY}" \
                         -H "Content-Type: application/json" \
