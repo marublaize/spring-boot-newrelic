@@ -35,9 +35,19 @@ pipeline {
 environment {
     SNYK_TOKEN = credentials('snyk-api-token')
     NEW_RELIC_API_KEY = credentials('newrelic')
+    NEW_RELIC_APP_ID=574050257
 }
 
     stages {
+        stage('Get Commit Hash') {
+            steps {
+                script {
+                    def commitHash = sh(script: 'git rev-parse --short HEAD', returnStdout: true).trim()
+                    env.COMMIT_HASH = commitHash
+                }
+            }
+        }
+
         stage('Download and Run Snyk CLI') {
             steps {
                 sh '''
@@ -84,24 +94,19 @@ environment {
 
         stage('Notify New Relic') {
             steps {
-                script {
-                    sh '''
-                        NEW_RELIC_APP_ID=574050257
-                        COMMIT_HASH=(git rev-parse --short HEAD)
-
-                        curl -X POST "https://api.newrelic.com/v2/applications/${NEW_RELIC_APP_ID}/deployments.json" \
+                sh '''
+                    curl -X POST "https://api.newrelic.com/v2/applications/${NEW_RELIC_APP_ID}/deployments.json" \
                         -H "X-Api-Key:${NEW_RELIC_API_KEY}" \
                         -H "Content-Type: application/json" \
-                        -d '{
-                            "deployment": {
-                                "revision": "${COMMIT_HASH}",
-                                "changelog": "See GitHub for details",
-                                "description": "Deployment triggered by Jenkins",
-                                "user": "Jenkins"
+                        -d "{
+                            \"deployment\": {
+                                \"revision\": \"${COMMIT_HASH}\",
+                                \"changelog\": \"See GitHub for details\",
+                                \"description\": \"Deployment triggered by Jenkins\",
+                                \"user\": \"Jenkins\"
                             }
-                        }'
-                    '''
-                }
+                        }"
+                '''
             }
         }
     }
