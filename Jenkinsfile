@@ -83,30 +83,53 @@ environment {
             // }
         }
 
+        // stage('Notify New Relic') {
+        //     steps {
+        //         sh '''
+        //             apt update -qq && apt install -y -qq jq
+        //             NEW_RELIC_APP_ID=$(curl -s -X GET "https://api.newrelic.com/v2/applications.json" \
+        //                 -H "X-Api-Key:${NEW_RELIC_API_KEY}" \
+        //                 -d "filter[name]=${APP_NAME}" | jq -r '.applications[0].id')
+
+        //             git config --global --add safe.directory ${PWD}
+        //             COMMIT_HASH=$(git rev-parse --short HEAD)
+        //             curl -s -X POST "https://api.newrelic.com/v2/applications/${NEW_RELIC_APP_ID}/deployments.json" \
+        //                 -H "X-Api-Key:${NEW_RELIC_API_KEY}" \
+        //                 -H "Content-Type: application/json" \
+        //                 -d '{
+        //                     "deployment": {
+        //                         "revision": "'"${COMMIT_HASH}"'",
+        //                         "changelog": "See GitHub for details",
+        //                         "description": "Deployment triggered by Jenkins",
+        //                         "user": "Jenkins"
+        //                     }
+        //                 }'
+        //         '''
+        //     }
+        // }
+
         stage('Notify New Relic') {
             steps {
                 sh '''
                     apt update -qq && apt install -y -qq jq
-                    NEW_RELIC_APP_ID=$(curl -s -X GET "https://api.newrelic.com/v2/applications.json" \
-                        -H "X-Api-Key:${NEW_RELIC_API_KEY}" \
-                        -d "filter[name]=${APP_NAME}" | jq -r '.applications[0].id')
+                    
+                    # Install New Relic CLI
+                    curl -Ls https://download.newrelic.com/install/newrelic-cli/scripts/install.sh | bash
+                    
+                    NEW_RELIC_APP_ID=$(newrelic apm application search --name "${APP_NAME}" --output json | jq -r '.[0].id')
 
                     git config --global --add safe.directory ${PWD}
                     COMMIT_HASH=$(git rev-parse --short HEAD)
-                    curl -s -X POST "https://api.newrelic.com/v2/applications/${NEW_RELIC_APP_ID}/deployments.json" \
-                        -H "X-Api-Key:${NEW_RELIC_API_KEY}" \
-                        -H "Content-Type: application/json" \
-                        -d '{
-                            "deployment": {
-                                "revision": "'"${COMMIT_HASH}"'",
-                                "changelog": "See GitHub for details",
-                                "description": "Deployment triggered by Jenkins",
-                                "user": "Jenkins"
-                            }
-                        }'
+                    
+                    newrelic apm deployment create \
+                        --applicationId ${NEW_RELIC_APP_ID} \
+                        --revision ${COMMIT_HASH} \
+                        --changelog "See GitHub for details" \
+                        --description "Deployment triggered by Jenkins" \
+                        --user "Jenkins"
                 '''
             }
         }
-    }
 
+    }
 }
