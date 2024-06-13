@@ -111,7 +111,7 @@ environment {
         stage('Notify New Relic') {
             steps {
                 sh '''
-                    apt update -qq && apt install -y -qq jq
+                    apt update -qq && apt install -y -qq jq sudo
                     
                     # Install New Relic CLI
                     curl -Ls https://download.newrelic.com/install/newrelic-cli/scripts/install.sh | bash
